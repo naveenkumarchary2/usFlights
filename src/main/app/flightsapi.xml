@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+    <http:listener-config name="flightsapi-httpListenerConfig" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration" />
+    <apikit:config name="flightsapi-config" raml="flightsapi.raml" consoleEnabled="false" doc:name="Router" />
+    <flow name="flightsapi-main">
+        <http:listener config-ref="flightsapi-httpListenerConfig" path="/api/*" doc:name="HTTP" />
+        <apikit:router config-ref="flightsapi-config" doc:name="APIkit Router" />
+        <exception-strategy ref="flightsapi-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy" />
+    </flow>
+    <flow name="flightsapi-console">
+        <http:listener config-ref="flightsapi-httpListenerConfig" path="/console/*" doc:name="HTTP" />
+        <apikit:console config-ref="flightsapi-config" doc:name="APIkit Console" />
+    </flow>
+    <flow name="get:/detlatFlightsByDestination:flightsapi-config">
+        <flow-ref name="deltaairlinesFlow" doc:name="Flow Reference"/>
+
+    </flow>
+    <flow name="get:/allFightsByDestination:flightsapi-config">
+        <set-session-variable variableName="svUniqueId" value="#[message.inboundProperties.uniqueid]" doc:name="Session Variable"/>
+        <logger message="Request receiveved y allFlightsByDestiantion #[sessionVars.svUniqueId]" level="INFO" doc:name="Logger"/>
+        <flow-ref name="allflightsByDestinationFlow" doc:name="allflightsByDestinationFlow"/>
+
+    </flow>
+    <flow name="get:/unitedFlightsByDestination:flightsapi-config">
+        <flow-ref name="unitedAirlinesFlow" doc:name="unitedAirlinesFlow"/>
+
+    </flow>
+    <apikit:mapping-exception-strategy name="flightsapi-apiKitGlobalExceptionMapping">
+        <apikit:mapping statusCode="404">
+            <apikit:exception value="org.mule.module.apikit.exception.NotFoundException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property" />
+            <set-payload value="{ &quot;message&quot;: &quot;Resource not found&quot; }" doc:name="Set Payload" />
+        </apikit:mapping>
+        <apikit:mapping statusCode="405">
+            <apikit:exception value="org.mule.module.apikit.exception.MethodNotAllowedException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property" />
+            <set-payload value="{ &quot;message&quot;: &quot;Method not allowed&quot; }" doc:name="Set Payload" />
+        </apikit:mapping>
+        <apikit:mapping statusCode="415">
+            <apikit:exception value="org.mule.module.apikit.exception.UnsupportedMediaTypeException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property" />
+            <set-payload value="{ &quot;message&quot;: &quot;Unsupported media type&quot; }" doc:name="Set Payload" />
+        </apikit:mapping>
+        <apikit:mapping statusCode="406">
+            <apikit:exception value="org.mule.module.apikit.exception.NotAcceptableException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property" />
+            <set-payload value="{ &quot;message&quot;: &quot;Not acceptable&quot; }" doc:name="Set Payload" />
+        </apikit:mapping>
+        <apikit:mapping statusCode="400">
+            <apikit:exception value="org.mule.module.apikit.exception.BadRequestException" />
+            <set-property propertyName="Content-Type" value="application/json" doc:name="Property" />
+            <set-payload value="{ &quot;message&quot;: &quot;Bad request&quot; }" doc:name="Set Payload" />
+        </apikit:mapping>
+    </apikit:mapping-exception-strategy>
+</mule>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+     <http:request-config name="HTTP_Request_Configuration" host="mu.mulesoft-training.com" port="80" doc:name="HTTP Request Configuration" />
+    <flow name="unitedAirlinesFlow">
+        <logger message="united Airlines flow starts ......................" level="INFO" doc:name="Logger"/>
+        <http:request config-ref="HTTP_Request_Configuration" path="/essentials/united/flights/#[message.inboundProperties.'http.query.params'.destination]" method="GET" doc:name="HTTP" />
+        <logger message="Resonse from united Airlines ===#[message.payloadAs(java.lang.String)]" level="INFO" doc:name="Logger" />
+        <catch-exception-strategy doc:name="Catch Exception Strategy">
+            <logger message="Exception in United Airliens Flow " level="INFO" doc:name="Logger"/>
+            <set-payload value="{
+&quot;code&quot;:500,
+&quot;message&quot;:&quot;Internal server Error&quot;
+}" mimeType="application/json" doc:name="Set Payload"/>
+        </catch-exception-strategy>
+    
+    
+    </flow>
+</mule>

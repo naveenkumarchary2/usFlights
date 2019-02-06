@@ -1,0 +1,52 @@
+#%RAML 0.8
+baseUri: http://localhost:8081/api
+title: flightsAPI
+
+traits:
+  - commonProperties:
+       headers:
+        uniqueId:  
+          type: String   
+        sourceApp:
+          type: String 
+          
+/detlatFlightsByDestination:
+  get:
+    is: [commonProperties]
+      
+    queryParameters: 
+      destination:
+        minLength: 3
+        maxLength: 3
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: ! include detlatFlightsByDestination-get-request.json
+   
+/unitedFlightsByDestination:
+  get:
+    is: [commonProperties]
+    queryParameters: 
+      destination:
+        minLength: 3
+        maxLength: 3
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: ! include unitedFlightsByDestination-get-request.json  
+             
+            
+/allFightsByDestination:
+  get:
+    is: [commonProperties]
+    queryParameters: 
+      destination:
+        minLength: 3
+        maxLength: 3
+    responses: 
+      200:
+        body: 
+          application/json:
+            example: ! include allFightsByDestination-get-request.json      
